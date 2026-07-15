@@ -1,0 +1,4 @@
+username,password,expected_text,expected_result
+tomsmith,SuperSecretPassword!,You logged into a secure area!,success
+tomsmith,wrongpassword,Your password is invalid!,failure
+wronguser,wrongpassword,Your username is invalid!,failure

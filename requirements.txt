@@ -1,0 +1,9 @@
+selenium
+pytest
+pytest-html
+allure-pytest
+pytest-rerunfailures
+python-dotenv
+requests
+openpyxl
+webdriver-manager

@@ -1,0 +1,4 @@
+endpoint,method,payload,expected_status
+/users/1,GET,,200
+/users/999,GET,,404
+/users,POST,"{""name"":""Alisha"",""job"":""QA""}",201

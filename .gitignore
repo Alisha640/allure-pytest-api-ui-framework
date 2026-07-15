@@ -1,0 +1,18 @@
+# Python environment cache and compiler junk
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.env
+
+# Local Test Reports (GitHub Actions will generate its own pristine versions)
+reports/
+allure-report/
+allure-results/
+test_file.txt
+
+# System and IDE configuration settings
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
