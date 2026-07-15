@@ -8,6 +8,10 @@ on:
   pull_request:
     branches: [ main ]
 
+# Grants permission to upload the website files to a new branch
+permissions:
+  contents: write
+
 # jobs named as test
 jobs:
   test:
@@ -46,6 +50,33 @@ jobs:
         REQRES_PASSWORD: ${{ secrets.REQRES_PASSWORD }}
         API_REGISTER_EMAIL: ${{ secrets.API_REGISTER_EMAIL }}
         API_REGISTER_PASSWORD: ${{ secrets.API_REGISTER_PASSWORD }}
-      run: python -m pytest tests/ --headless --alluredir=reports/allure-results 
+      run: python -m pytest tests/ --headless --alluredir=reports/allure-results
+      # added "if: always()" to the following steps soreport builds even if a test fails
+      # 1. Pulling previous test histories from gh-pages branch to build trends
+    - name: Load test report history
+      uses: actions/checkout@v3
+      if: always()
+      continue-on-error: true
+      with:
+        ref: gh-pages
+        path: gh-pages
+
+    # 2. Compiling raw JSON results into the final static website folder
+    - name: Build Allure test report
+      uses: simple-elf/allure-report-action@v1.7
+      if: always()
+      with:
+        gh_pages: gh-pages
+        allure_results: allure-results
+        allure_history: allure-history
+
+    # 3. Publishing the generated website folder live to the web
+    - name: Publish test report to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      if: always()
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_branch: gh-pages
+        publish_dir: allure-history
 
 # A pipeline is an automated sequence of steps that runs our test suite whenever code is pushed to the repository. It installs dependencies, sets up the environment and runs tests automatically without manual intervention so we catch bugs immediately when new code is merged"
