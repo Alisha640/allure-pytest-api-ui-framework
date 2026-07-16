@@ -67,7 +67,7 @@ jobs:
       if: always()
       with:
         gh_pages: gh-pages
-        allure_results: allure-results
+        allure_results: allure_results: reports/allure-results
         allure_history: allure-history
 
     # 3. Publishing the generated website folder live to the web
