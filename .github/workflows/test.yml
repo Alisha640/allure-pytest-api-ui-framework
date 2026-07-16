@@ -1,37 +1,37 @@
 name: Selenium Test Suite
+# name of pipeline
 
+# pipeline runs on push and pull request events to the main branch
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
 
-permissions:
-  contents: write
-
 jobs:
   test:
+  # pipeline runs in latest linux env provided by GitHub Actions
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
-
+    # setting up chrome nd firefox for tests as linux env does not have browsers installed by default
     - name: Setup Chrome and Firefox Browsers
       uses: browser-actions/setup-chrome@v1
     - name: Setup Firefox Browser
       uses: browser-actions/setup-firefox@v1
-
+    # setting up python for running tests
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.11'
-
+      # installing dependencies from requirements.txt file
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-
+      # runs tests mapping the secrets from GitHub Actions to environment variables for use in the tests
     - name: Run tests headless
       env:
         MY_KEY: ${{ secrets.MY_KEY }}
@@ -42,45 +42,3 @@ jobs:
         API_REGISTER_EMAIL: ${{ secrets.API_REGISTER_EMAIL }}
         API_REGISTER_PASSWORD: ${{ secrets.API_REGISTER_PASSWORD }}
       run: python -m pytest tests/ --headless --alluredir=reports/allure-results
-      
-    # 1. Download and set up the Allure Command Line tool natively
-    - name: Install Allure CLI tool
-      if: always()
-      run: |
-        ALLURE_VERSION="2.24.0"
-        curl -o allure.tgz -QsSL https://github.com{ALLURE_VERSION}/allure-${ALLURE_VERSION}.tgz
-        tar -zxf allure.tgz
-        sudo mv allure-${ALLURE_VERSION} /opt/allure
-        sudo ln -s /opt/allure/bin/allure /usr/bin/allure
-
-    # 2. Pull history trends from gh-pages branch so graphs link sequentially
-    - name: Load test report history
-      uses: actions/checkout@v3
-      if: always()
-      continue-on-error: true
-      with:
-        ref: gh-pages
-        path: gh-pages-dir
-
-    # 3. Copy history files over to feed the chart trendlines
-    - name: Process Allure history data
-      if: always()
-      run: |
-        mkdir -p reports/allure-results/history
-        if [ -d "gh-pages-dir/history" ]; then
-          cp -r gh-pages-dir/history/* reports/allure-results/history/
-        fi
-
-    # 4. Generate the final static web archive folder
-    - name: Generate final Allure report folder
-      if: always()
-      run: allure generate reports/allure-results -o final-html-report --clean
-
-    # 5. Push the compiled website folder up live onto GitHub Pages
-    - name: Publish test report to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
-      if: always()
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_branch: gh-pages
-        publish_dir: final-html-report
